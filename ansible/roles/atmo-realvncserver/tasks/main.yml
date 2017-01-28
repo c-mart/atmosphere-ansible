@@ -41,29 +41,32 @@
     - tar
 
 # Perform install/config if NOT headless
+- name: old VNC server packages uninstalled if they exist
+  package:
+    name: realvnc-vnc-server
+    state: absent
+  when: has_gui
+  # Do not fail if package was previously installed
+  ignore_errors: yes
+
 - name: create needed directories
   file: path=/etc/vnc/config.d state=directory mode=0755
   with_items: XGUI.dirs_to_make
-  when: xsession.stat.exists and xterm.stat.exists
+  when: has_gui
   tags: vnc
 
 - name: install the dependencies for vncserver
   action: >
     {{ ansible_pkg_mgr }} name={{ item }} state=present
   with_items: '{{ XGUI.vnc_dependencies }}'
-  when: xsession.stat.exists and xterm.stat.exists
+  when: has_gui
   tags: vnc
 
 - name: copy required files to remote host
   copy: src={{ item.FROM }} dest={{ item.TO }}
   with_items: '{{ XGUI.files_to_add }}'
-  when: xsession.stat.exists and xterm.stat.exists
+  when: has_gui
   tags: vnc
-
-- name: old VNC server packages uninstalled if they exist
-  package:
-    name: realvnc-vnc-server
-    state: absent
 
 - name: install the package for vncserver if CentOS 5
   yum:
