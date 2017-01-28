@@ -60,6 +60,11 @@
   when: xsession.stat.exists and xterm.stat.exists
   tags: vnc
 
+- name: old VNC server packages uninstalled if they exist
+  package:
+    name: realvnc-vnc-server
+    state: absent
+
 - name: install the package for vncserver if CentOS 5
   yum:
     name: "{{ item }}"
